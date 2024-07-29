@@ -2,8 +2,8 @@ import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.Map;
@@ -13,8 +13,15 @@ import java.util.logging.Logger;
 public class ApiServer {
 
     private static final Logger logger = Logger.getLogger(ApiServer.class.getName());
+    private static final String UPLOAD_DIR = "uploads";
 
     public static void main(String[] args) throws IOException {
+        // Ensure upload directory exists
+        File uploadDir = new File(UPLOAD_DIR);
+        if (!uploadDir.exists()) {
+            uploadDir.mkdir();
+        }
+
         logger.info("Starting the server...");
         HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
         server.createContext("/api/uploadPhoto", new UploadPhotoHandler());
@@ -22,51 +29,9 @@ public class ApiServer {
         server.createContext("/api/photos/", new PhotoActionHandler());
         server.createContext("/api/photos", new ListPhotosHandler());
         server.createContext("/api/photos/search", new SearchPhotosHandler());
-        server.setExecutor(null); 
+        server.setExecutor(null);
         server.start();
         logger.info("Server started on port 8000");
-    }
-
-    static class UploadPhotoHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            if ("POST".equals(exchange.getRequestMethod())) {
-                logger.info("Received request to upload photo");
-                InputStream is = exchange.getRequestBody();
-                byte[] fileBytes = is.readAllBytes();
-                // Process file 
-                String response = "Uploaded file";
-                exchange.sendResponseHeaders(200, response.length());
-                OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes());
-                os.close();
-                logger.info("Photo uploaded successfully");
-            } else {
-                exchange.sendResponseHeaders(405, -1); // Method Not Allowed
-                logger.warning("Received non-POST request to /uploadPhoto");
-            }
-        }
-    }
-
-    static class UploadMetadataHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            if ("POST".equals(exchange.getRequestMethod())) {
-                logger.info("Received request to upload metadata");
-                InputStream is = exchange.getRequestBody();
-                String metadata = new String(is.readAllBytes());
-                // Process metadata 
-                String response = "Uploaded metadata";
-                exchange.sendResponseHeaders(200, response.length());
-                OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes());
-                os.close();
-                logger.info("Metadata uploaded successfully");
-            } else {
-                exchange.sendResponseHeaders(405, -1); // Method Not Allowed
-                logger.warning("Received non-POST request to /uploadMetadata");
-            }
-        }
     }
 
     static class PhotoActionHandler implements HttpHandler {
@@ -117,24 +82,6 @@ public class ApiServer {
         }
     }
 
-    static class SearchPhotosHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            if ("GET".equals(exchange.getRequestMethod())) {
-                logger.info("Received request to search photos");
-                Map<String, String> queryParams = parseQueryParams(exchange.getRequestURI().getQuery());
-                String response = "Search results based on: " + queryParams.toString();
-                exchange.sendResponseHeaders(200, response.length());
-                OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes());
-                os.close();
-                logger.info("Search photos request processed successfully with parameters: " + queryParams.toString());
-            } else {
-                exchange.sendResponseHeaders(405, -1); // Method Not Allowed
-                logger.warning("Received non-GET request to /photos/search");
-            }
-        }
-
         private Map<String, String> parseQueryParams(String query) {
             Map<String, String> queryParams = new HashMap<>();
             if (query != null) {
@@ -148,4 +95,3 @@ public class ApiServer {
             return queryParams;
         }
     }
-}

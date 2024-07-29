@@ -12,6 +12,8 @@ import java.util.StringJoiner;
 
 public class ApiServerTest {
 
+    private static final String HTTP_LOCALHOST_8080_API_UPLOAD_PHOTO = "http://localhost:8080/api/uploadPhoto";
+
     public static void main(String[] args) throws IOException {
         testUploadPhoto();
         testUploadMetadata();
@@ -20,9 +22,9 @@ public class ApiServerTest {
         testGetAllPhotos();
         testSearchPhotos();
     }
-
+        // Make constants
     private static void testUploadPhoto() throws IOException {
-        URL url = new URL("http://localhost:8000/api/uploadPhoto");
+        URL url = new URL(HTTP_LOCALHOST_8080_API_UPLOAD_PHOTO);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
@@ -64,7 +66,7 @@ public class ApiServerTest {
     }
 
     private static void testLikePhoto() throws IOException {
-        URL url = new URL("http://localhost:8000/api/photos/123/like");
+        URL url = new URL("http://localhost:8080/api/photos/123/like");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
 
