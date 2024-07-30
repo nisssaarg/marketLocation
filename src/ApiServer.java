@@ -6,8 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.util.Map;
-import java.util.HashMap;
+import java.sql.SQLException;
 import java.util.logging.Logger;
 
 public class ApiServer {
@@ -32,37 +31,13 @@ public class ApiServer {
         server.setExecutor(null);
         server.start();
         logger.info("Server started on port 8000");
-    }
-
-    static class PhotoActionHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            String path = exchange.getRequestURI().getPath();
-            logger.info("Received request to perform action on photo: " + path);
-            String response;
-            if (path.matches("/api/photos/\\d+/like")) {
-                String photoId = extractPhotoId(path, "/like");
-                response = "Like posted for photo id: " + photoId;
-                logger.info("Like action performed on photo id: " + photoId);
-            } else if (path.matches("/api/photos/\\d+/buy")) {
-                String photoId = extractPhotoId(path, "/buy");
-                response = "Photo bought with id: " + photoId;
-                logger.info("Buy action performed on photo id: " + photoId);
-            } else {
-                exchange.sendResponseHeaders(404, -1); // Not Found
-                logger.warning("Invalid action request: " + path);
-                return;
-            }
-            exchange.sendResponseHeaders(200, response.length());
-            OutputStream os = exchange.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
-        }
-
-        private String extractPhotoId(String path, String action) {
-            return path.substring("/api/photos/".length(), path.length() - action.length());
+        try {
+            DatabasePool.create();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
+
 
     static class ListPhotosHandler implements HttpHandler {
         @Override
@@ -81,17 +56,4 @@ public class ApiServer {
             }
         }
     }
-
-        private Map<String, String> parseQueryParams(String query) {
-            Map<String, String> queryParams = new HashMap<>();
-            if (query != null) {
-                for (String param : query.split("&")) {
-                    String[] pair = param.split("=");
-                    if (pair.length == 2) {
-                        queryParams.put(pair[0], pair[1]);
-                    }
-                }
-            }
-            return queryParams;
-        }
-    }
+}

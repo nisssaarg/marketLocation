@@ -8,14 +8,19 @@ import java.util.logging.Logger;
 
 class UploadMetadataHandler implements HttpHandler {
 
-    // todo - fix copy paste error below
-    private static final Logger logger = Logger.getLogger(ApiServer.class.getName());
+    private static final String RECEIVED_NON_POST_REQUEST_TO_UPLOAD_METADATA = "Received non-POST request to /uploadMetadata";
+    private static final String FAILED_TO_PARSE_METADATA = "Failed to parse metadata: ";
+    private static final String METADATA_UPLOADED_SUCCESSFULLY = "Metadata uploaded successfully";
+    private static final String PARSED_METADATA = "Parsed metadata: ";
+    private static final String RECEIVED_REQUEST_TO_UPLOAD_METADATA = "Received request to upload metadata";
+    private static final String UPLOADED_METADATA_SUCCESSFULLY = "Uploaded metadata successfully";
+    private static final Logger logger = Logger.getLogger(UploadMetadataHandler.class.getName());
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if ("POST".equals(exchange.getRequestMethod())) {
-            logger.info("Received request to upload metadata");
+            logger.info(RECEIVED_REQUEST_TO_UPLOAD_METADATA);
             InputStream is = exchange.getRequestBody();
             String json = new String(is.readAllBytes());
 
@@ -23,25 +28,25 @@ class UploadMetadataHandler implements HttpHandler {
             Map<String, Object> metadata;
             try {
                 metadata = objectMapper.readValue(json, Map.class);
-                logger.info("Parsed metadata: " + metadata.toString());
+                logger.info(PARSED_METADATA + metadata.toString());
 
                 // Process the metadata (e.g., store it in a database)
                 MetadataWriter writer = new MetadataWriter();
                 writer.writeToDatabase(metadata);
 
-                String response = "Uploaded metadata successfully";
+                String response = UPLOADED_METADATA_SUCCESSFULLY;
                 exchange.sendResponseHeaders(200, response.length());
                 OutputStream os = exchange.getResponseBody();
                 os.write(response.getBytes());
                 os.close();
-                logger.info("Metadata uploaded successfully");
+                logger.info(METADATA_UPLOADED_SUCCESSFULLY);
             } catch (IOException e) {
-                logger.severe("Failed to parse metadata: " + e.getMessage());
+                logger.severe(FAILED_TO_PARSE_METADATA + e.getMessage());
                 exchange.sendResponseHeaders(400, -1); // Bad Request
             }
         } else {
             exchange.sendResponseHeaders(405, -1); // Method Not Allowed
-            logger.warning("Received non-POST request to /uploadMetadata");
+            logger.warning(RECEIVED_NON_POST_REQUEST_TO_UPLOAD_METADATA);
         }
     }
 }

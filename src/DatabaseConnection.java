@@ -17,6 +17,7 @@ public class DatabaseConnection {
         if (connection == null) {
             try {
                 connection = DriverManager.getConnection(DB_URL, USER, PASS);
+                connection.setAutoCommit(false);
                 System.out.println("Connected to the PostgreSQL server successfully.");
             } catch (SQLException e) {
                 System.out.println("Connection failed.");

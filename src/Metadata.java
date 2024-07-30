@@ -1,7 +1,7 @@
 import java.util.Map;
 
 // todo - use final pretty much everywhere in thsi class
-public class Metadata {
+public final class Metadata {
     private int metadataId;
     private String photo_path;      
     private String location;   
