@@ -31,7 +31,7 @@ public class uploadClient {
         String filePath = "/Users/nisssaarg/Downloads/photomarketplace.png";
 
         // Metadata
-        String location = "SanFrancisco";
+        String location = "Fremont";
         String subject = "Goldengate";
         String season = "Summer";
         String[] keywords = {"Nature", "Park", "Trees", "Bridge"};

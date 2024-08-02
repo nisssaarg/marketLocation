@@ -12,6 +12,9 @@ import java.util.StringJoiner;
 
 public class ApiServerTest {
 
+    private static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String POST = "POST";
     private static final String HTTP_LOCALHOST_8080_API_UPLOAD_PHOTO = "http://localhost:8080/api/uploadPhoto";
 
     public static void main(String[] args) throws IOException {
@@ -26,9 +29,9 @@ public class ApiServerTest {
     private static void testUploadPhoto() throws IOException {
         URL url = new URL(HTTP_LOCALHOST_8080_API_UPLOAD_PHOTO);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("POST");
+        connection.setRequestMethod(POST);
         connection.setDoOutput(true);
-        connection.setRequestProperty("Content-Type", "application/octet-stream");
+        connection.setRequestProperty(CONTENT_TYPE, APPLICATION_OCTET_STREAM);
 
         try (OutputStream os = connection.getOutputStream()) {
             os.write("dummy photo content".getBytes(StandardCharsets.UTF_8));
@@ -47,9 +50,9 @@ public class ApiServerTest {
     private static void testUploadMetadata() throws IOException {
         URL url = new URL("http://localhost:8000/api/uploadMetadata");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("POST");
+        connection.setRequestMethod(POST);
         connection.setDoOutput(true);
-        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestProperty(CONTENT_TYPE, "application/json");
 
         try (OutputStream os = connection.getOutputStream()) {
             os.write("{\"key\": \"value\"}".getBytes(StandardCharsets.UTF_8));
@@ -68,7 +71,7 @@ public class ApiServerTest {
     private static void testLikePhoto() throws IOException {
         URL url = new URL("http://localhost:8080/api/photos/123/like");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("POST");
+        connection.setRequestMethod(POST);
 
         int responseCode = connection.getResponseCode();
         String response = readResponse(connection);
@@ -83,7 +86,7 @@ public class ApiServerTest {
     private static void testBuyPhoto() throws IOException {
         URL url = new URL("http://localhost:8000/api/photos/123/buy");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("POST");
+        connection.setRequestMethod(POST);
 
         int responseCode = connection.getResponseCode();
         String response = readResponse(connection);

@@ -3,6 +3,8 @@ import com.sun.net.httpserver.HttpExchange;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.*;
+import java.util.HashMap;
+// /import java.sql.ResultSet;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -23,7 +25,8 @@ class UploadMetadataHandler implements HttpHandler {
             logger.info(RECEIVED_REQUEST_TO_UPLOAD_METADATA);
             InputStream is = exchange.getRequestBody();
             String json = new String(is.readAllBytes());
-
+            Queue queue = new Queue("Thumbnail");
+            Map<String, String> rs = new HashMap<>();
             // Parse the JSON metadata
             Map<String, Object> metadata;
             try {
@@ -32,8 +35,7 @@ class UploadMetadataHandler implements HttpHandler {
 
                 // Process the metadata (e.g., store it in a database)
                 MetadataWriter writer = new MetadataWriter();
-                writer.writeToDatabase(metadata);
-
+                rs = writer.writeToDatabase(metadata);
                 String response = UPLOADED_METADATA_SUCCESSFULLY;
                 exchange.sendResponseHeaders(200, response.length());
                 OutputStream os = exchange.getResponseBody();
@@ -43,6 +45,12 @@ class UploadMetadataHandler implements HttpHandler {
             } catch (IOException e) {
                 logger.severe(FAILED_TO_PARSE_METADATA + e.getMessage());
                 exchange.sendResponseHeaders(400, -1); // Bad Request
+            }
+            finally{
+                if(rs != null){
+                    logger.info("Queueing");
+                    queue.enqueue(rs);
+                }
             }
         } else {
             exchange.sendResponseHeaders(405, -1); // Method Not Allowed

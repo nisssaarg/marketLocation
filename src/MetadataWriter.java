@@ -1,38 +1,40 @@
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
 public class MetadataWriter {
+    private static final String PHOTO_PATH = "photo_path";
+    private static final String METADATA_ID = "metadata_id";
+    private static final String INSERT_INTO_METADATA = "INSERT INTO metadata (location, photo_path, season, subject, keyword1, keyword2, keyword3, keyword4, keyword5) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING metadata_id, photo_path";
+    private static final String CONNECTION_RELEASED = "Connection released";
     private static final String METADATA_INSERTED_SUCCESSFULLY = "Metadata inserted successfully";
     private static final String FAILED_TO_INSERT_DATA = "Failed to insert data.";
-    //private static final String DATA_INSERTED_SUCCESSFULLY = "Data inserted successfully.";
-    //private static final String NO_CONNECTION_PRESENT = "No connection present";
     private static final Logger logger = Logger.getLogger(MetadataWriter.class.getName());
     public Connection connection;
     
-    public MetadataWriter(){
-        // todo - you will switch this to get from a connection pool
-        // because, you don't want singleton and also you don't want to create connection everytime
-        // when you change all that, if you get a connection in the constructor, what is the right
-        // place to give it back?
+    public MetadataWriter() {
+        // Constructor implementation
     }
 
-    public void writeToDatabase(Map<String, Object> metadata) {
+    public Map<String, String> writeToDatabase(Map<String, Object> metadata) {
         Metadata metadataObject = new Metadata(metadata);
-        writetoDatabaseHelper(metadataObject);
+        return writetoDatabaseHelper(metadataObject);
     }
 
-    public void writetoDatabaseHelper(Metadata metadata) {
-        String sql = "INSERT INTO metadata (location, photo_path, season, subject, keyword1, keyword2, keyword3, keyword4, keyword5) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    public Map<String, String> writetoDatabaseHelper(Metadata metadata) {
+        String sql = INSERT_INTO_METADATA;
         
         Connection conn = null;
         PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        Map<String, String> result = new HashMap<>();
         
         try {
             conn = DatabasePool.getConnection();
-            // todo - move this to pool
             conn.setAutoCommit(false);
             pstmt = conn.prepareStatement(sql);
             
@@ -46,15 +48,17 @@ public class MetadataWriter {
             pstmt.setString(8, metadata.getKeyword4());
             pstmt.setString(9, metadata.getKeyword5());
     
-            pstmt.executeUpdate();
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                result.put(METADATA_ID, rs.getString(METADATA_ID));
+                result.put(PHOTO_PATH, rs.getString(PHOTO_PATH));
+            }
+            logger.info("Result" + result.toString());
             conn.commit();
-            //conn.rollback();
             System.out.println(METADATA_INSERTED_SUCCESSFULLY);
         } catch (SQLException e) {
-            //logger.info("Here");
             if (conn != null) {
                 try {
-                    // todo - also do this in connection pool return connection
                     conn.rollback();
                 } catch (SQLException ex) {
                     ex.printStackTrace();
@@ -63,10 +67,25 @@ public class MetadataWriter {
             e.printStackTrace();
             System.err.println(FAILED_TO_INSERT_DATA + e.getMessage());
         } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (pstmt != null) {
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
             if (conn != null) {
-                logger.info("Connection released");
+                logger.info(CONNECTION_RELEASED);
                 DatabasePool.releaseConnection(conn);
             }
         }
+        return result;
     }
 }

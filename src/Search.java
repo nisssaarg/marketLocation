@@ -4,10 +4,21 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 public class Search {
+    private static final String OR = " OR (";
+    private static final String KEYWORD = "keyword";
+    private static final String SUBJECT2 = " subject = ?";
+    private static final String SUBJECT = "subject";
+    private static final String SEASON2 = " season = ?";
+    private static final String SEASON = "season";
+    private static final String AND = " AND";
+    private static final String LOCATION2 = " location = ?";
+    private static final String LOCATION = "location";
+    private static final String WHERE = " WHERE";
+    private static final String SELECT_PHOTO_PATH_FROM_METADATA = "SELECT photo_path FROM metadata";
     private static final Logger logger = Logger.getLogger(Search.class.getName());
 
     public List<String> searchPhotos(Map<String, String> queryParams) {
-        StringBuilder sqlBuilder = new StringBuilder("SELECT photo_path FROM metadata");
+        StringBuilder sqlBuilder = new StringBuilder(SELECT_PHOTO_PATH_FROM_METADATA);
         List<Object> parameters = new ArrayList<>();
 
         // Initialize a flag to indicate if WHERE clause has been added
@@ -15,44 +26,44 @@ public class Search {
 
         // Start building the WHERE clause
         if (!queryParams.isEmpty()) {
-            sqlBuilder.append(" WHERE"); // Start WHERE clause
+            sqlBuilder.append(WHERE); // Start WHERE clause
 
             // Check for location
-            if (queryParams.containsKey("location")) {
+            if (queryParams.containsKey(LOCATION)) {
                 if (!isFirstCondition) {
-                    sqlBuilder.append(" AND");
+                    sqlBuilder.append(AND);
                 }
-                sqlBuilder.append(" location = ?");
-                parameters.add(queryParams.get("location"));
+                sqlBuilder.append(LOCATION2);
+                parameters.add(queryParams.get(LOCATION));
                 isFirstCondition = false;
             }
 
             // Check for season
-            if (queryParams.containsKey("season")) {
+            if (queryParams.containsKey(SEASON)) {
                 if (!isFirstCondition) {
-                    sqlBuilder.append(" AND");
+                    sqlBuilder.append(AND);
                 }
-                sqlBuilder.append(" season = ?");
-                parameters.add(queryParams.get("season"));
+                sqlBuilder.append(SEASON2);
+                parameters.add(queryParams.get(SEASON));
                 isFirstCondition = false;
             }
 
             // Check for subject
-            if (queryParams.containsKey("subject")) {
+            if (queryParams.containsKey(SUBJECT)) {
                 if (!isFirstCondition) {
-                    sqlBuilder.append(" AND");
+                    sqlBuilder.append(AND);
                 }
-                sqlBuilder.append(" subject = ?");
-                parameters.add(queryParams.get("subject"));
+                sqlBuilder.append(SUBJECT2);
+                parameters.add(queryParams.get(SUBJECT));
                 isFirstCondition = false;
             }
 
             // Handle keywords
             for (int i = 1; i <= 5; i++) {
-                String key = "keyword" + i;
+                String key = KEYWORD + i;
                 if (queryParams.containsKey(key)) {
                     if (!isFirstCondition) {
-                        sqlBuilder.append(" OR ("); // Open parenthesis for keyword conditions
+                        sqlBuilder.append(OR); // Open parenthesis for keyword conditions
                     } else {
                         sqlBuilder.append(" ("); // Open parenthesis for keyword conditions
                     }

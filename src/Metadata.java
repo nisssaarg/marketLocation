@@ -2,6 +2,15 @@ import java.util.Map;
 
 // todo - use final pretty much everywhere in thsi class
 public final class Metadata {
+    private static final String KEYWORD52 = "keyword5";
+    private static final String KEYWORD32 = "keyword3";
+    private static final String KEYWORD42 = "keyword4";
+    private static final String KEYWORD22 = "keyword2";
+    private static final String KEYWORD12 = "keyword1";
+    private static final String SUBJECT2 = "subject";
+    private static final String SEASON2 = "season";
+    private static final String LOCATION2 = "location";
+    private static final String PHOTO_PATH2 = "photo_path";
     private int metadataId;
     private String photo_path;      
     private String location;   
@@ -16,15 +25,15 @@ public final class Metadata {
     // Constructor that accepts a Map
     public Metadata(Map<String, Object> data) {
         //this.metadataId = (int) data.get("metadataId");
-        this.photo_path = (String) data.get("photo_path");
-        this.location = (String) data.get("location");
-        this.season = (String) data.get("season");
-        this.subject = (String) data.get("subject");
-        this.keyword1 = (String) data.get("keyword1");
-        this.keyword2 = (String) data.get("keyword2");
-        this.keyword3 = (String) data.get("keyword3");
-        this.keyword4 = (String) data.get("keyword4");
-        this.keyword5 = (String) data.get("keyword5");
+        this.photo_path = (String) data.get(PHOTO_PATH2);
+        this.location = (String) data.get(LOCATION2);
+        this.season = (String) data.get(SEASON2);
+        this.subject = (String) data.get(SUBJECT2);
+        this.keyword1 = (String) data.get(KEYWORD12);
+        this.keyword2 = (String) data.get(KEYWORD22);
+        this.keyword3 = (String) data.get(KEYWORD32);
+        this.keyword4 = (String) data.get(KEYWORD42);
+        this.keyword5 = (String) data.get(KEYWORD52);
     }
 
     // Getters and Setters
