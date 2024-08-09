@@ -1,40 +1,38 @@
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Duration;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.clients.producer.Callback;
 
-class Queue {
-    private static final String OFFSET = " offset ";
-    private static final String PARTITION = " partition ";
-    private static final String MESSAGE_SENT_TO_TOPIC = "Message sent to topic ";
-    private static final String ALL = "all";
-    private static final String ACKS = "acks";
-    private static final String VALUE_SERIALIZER = "value.serializer";
-    private static final String ORG_APACHE_KAFKA_COMMON_SERIALIZATION_STRING_SERIALIZER = "org.apache.kafka.common.serialization.StringSerializer";
-    private static final String KEY_SERIALIZER = "key.serializer";
-    private static final String LOCALHOST_9092 = "localhost:9092";
-    private static final String BOOTSTRAP_SERVERS = "bootstrap.servers";
-    private final KafkaProducer<String, String> producer;
-    private final String topic;
-    private final ObjectMapper objectMapper;
+public class Queue {
+    private Properties properties;
+    private KafkaProducer<String, String> producer;
+    private KafkaConsumer<String, String> consumer;
+    //private Gson gson;
+    private String topic = "Thumbnail";
 
-    public Queue(String topic) {
-        this.topic = topic;
-        Properties props = new Properties();
-        props.put(BOOTSTRAP_SERVERS, LOCALHOST_9092); // Change to your Kafka server
-        props.put(KEY_SERIALIZER, ORG_APACHE_KAFKA_COMMON_SERIALIZATION_STRING_SERIALIZER);
-        props.put(VALUE_SERIALIZER, ORG_APACHE_KAFKA_COMMON_SERIALIZATION_STRING_SERIALIZER);
-        props.put(ACKS, ALL);
-        this.producer = new KafkaProducer<>(props);
-        this.objectMapper = new ObjectMapper();
+    public Queue() {
+        properties = new Properties();
+        properties.put("bootstrap.servers", "localhost:9092");
+        properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        properties.put("group.id", "thumbnail-consumer-group");
+        properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        properties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 
+        producer = new KafkaProducer<>(properties);
+        consumer = new KafkaConsumer<>(properties);
+        consumer.subscribe(Collections.singletonList(topic));
     }
 
-    public void enqueue(Map<String,String> rs) {
+    public synchronized void enqueue(Map<String,String> rs) {
         try {
             String message = rs.toString();
             ProducerRecord<String, String> record = new ProducerRecord<>(topic, message);
@@ -45,7 +43,7 @@ class Queue {
                     if (exception != null) {
                         exception.printStackTrace();
                     } else {
-                        System.out.println(MESSAGE_SENT_TO_TOPIC + metadata.topic() + PARTITION + metadata.partition() + OFFSET + metadata.offset());
+                        System.out.println("Message sent to topic" + metadata.topic() + "Partition" + metadata.partition() + "Offset" + metadata.offset());
                     }
                 }
             });
@@ -56,5 +54,24 @@ class Queue {
 
     public void close() {
         producer.close();
+    }
+
+    public synchronized String dequeue() {
+        try{
+            while(true){
+                System.out.println("Polling for messages...");
+                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
+                if (records.isEmpty()) {
+                    System.out.println("No records found.");
+                }
+                for (ConsumerRecord<String, String> record : records) {
+                    System.out.println("Record received: " + record.value());
+                    return record.toString();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

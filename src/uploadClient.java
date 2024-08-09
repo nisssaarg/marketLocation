@@ -27,29 +27,7 @@ public class uploadClient {
     private static final String UPLOAD_METADATA_URL = "http://localhost:8000/api/uploadMetadata";
     private static final Logger logger = Logger.getLogger(uploadClient.class.getName());
 
-    public static void main(String[] args) {
-        String filePath = "/Users/nisssaarg/Downloads/photomarketplace.png";
-
-        // Metadata
-        String location = "Fremont";
-        String subject = "Goldengate";
-        String season = "Summer";
-        String[] keywords = {"Nature", "Park", "Trees", "Bridge"};
-
-        try {
-            // Upload photo and retrieve the upload path
-            String uploadPath = uploadPhoto(filePath);
-
-            // Upload metadata only if photo upload was successful
-            if (!uploadPath.isEmpty()) {
-                uploadMetadata(location, subject, season, keywords, uploadPath);
-            }
-        } catch (IOException e) {
-            logger.log(Level.SEVERE, "An error occurred during file upload", e);
-        }
-    }
-
-    private static String uploadPhoto(String filePath) throws IOException {
+    public synchronized static String uploadPhoto(String filePath) throws IOException {
         File file = new File(filePath);
         if (!file.exists() || file.isDirectory()) {
             logger.severe("File not found: " + filePath);
@@ -108,7 +86,7 @@ public class uploadClient {
         return uploadPath;
     }
 
-    private static void uploadMetadata(String location, String subject, String season, String[] keywords, String uploadPath) {
+    public synchronized static void uploadMetadata(String location, String subject, String season, String[] keywords, String uploadPath) {
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpPost uploadMetadata = new HttpPost(UPLOAD_METADATA_URL);
 

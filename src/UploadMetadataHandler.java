@@ -25,14 +25,13 @@ class UploadMetadataHandler implements HttpHandler {
             logger.info(RECEIVED_REQUEST_TO_UPLOAD_METADATA);
             InputStream is = exchange.getRequestBody();
             String json = new String(is.readAllBytes());
-            Queue queue = new Queue("Thumbnail");
+            Queue queue = new Queue();
             Map<String, String> rs = new HashMap<>();
             // Parse the JSON metadata
             Map<String, Object> metadata;
             try {
                 metadata = objectMapper.readValue(json, Map.class);
                 logger.info(PARSED_METADATA + metadata.toString());
-
                 // Process the metadata (e.g., store it in a database)
                 MetadataWriter writer = new MetadataWriter();
                 rs = writer.writeToDatabase(metadata);
