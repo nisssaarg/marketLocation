@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 public class ApiServer {
@@ -34,7 +35,7 @@ public class ApiServer {
         server.createContext(API_PHOTOS, new PhotoActionHandler());
         server.createContext(API_PHOTOS2, new ListPhotosHandler());
         server.createContext(API_PHOTOS_SEARCH, new SearchPhotosHandler());
-        server.setExecutor(null);
+        server.setExecutor(Executors.newFixedThreadPool(10));
         server.start();
         logger.info(SERVER_STARTED_ON_PORT_8000);
         try {

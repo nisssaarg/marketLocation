@@ -16,10 +16,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import java.util.logging.*;
 
 public class uploadClient {
 
@@ -27,16 +28,50 @@ public class uploadClient {
     private static final String UPLOAD_METADATA_URL = "http://localhost:8000/api/uploadMetadata";
     private static final Logger logger = Logger.getLogger(uploadClient.class.getName());
 
-    public synchronized static String uploadPhoto(String filePath) throws IOException {
+    static {
+        setupLogger();
+    }
+
+    private static void setupLogger() {
+        try {
+            // Create a FileHandler
+            FileHandler fileHandler = new FileHandler("uploader.log", true);
+            
+            // Create a SimpleFormatter
+            SimpleFormatter formatter = new SimpleFormatter();
+            fileHandler.setFormatter(formatter);
+
+            // Remove existing handlers (to avoid console output)
+            Logger rootLogger = Logger.getLogger("");
+            Handler[] handlers = rootLogger.getHandlers();
+            for(Handler handler : handlers) {
+                rootLogger.removeHandler(handler);
+            }
+
+            // Add the FileHandler to the logger
+            logger.addHandler(fileHandler);
+
+            // Set the logging level
+            logger.setLevel(Level.ALL);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static String uploadPhoto(String filePath) throws IOException {
         File file = new File(filePath);
         if (!file.exists() || file.isDirectory()) {
             logger.severe("File not found: " + filePath);
             return "";
         }
 
+        String uploadPath = "";
+        Instant startTime = Instant.now();
+        logger.info("Starting photo upload for: " + filePath);
+
         HttpURLConnection connection = null;
         DataOutputStream dos = null;
-        String uploadPath = "";
 
         try (FileInputStream fis = new FileInputStream(file)) {
             URL url = new URL(UPLOAD_PHOTO_URL);
@@ -75,6 +110,8 @@ public class uploadClient {
             } else {
                 logger.severe("Failed to upload file. Server responded with code: " + responseCode);
             }
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error uploading file: " + filePath, e);
         } finally {
             if (dos != null) {
                 dos.close();
@@ -82,16 +119,22 @@ public class uploadClient {
             if (connection != null) {
                 connection.disconnect();
             }
+            Instant endTime = Instant.now();
+            long timeTaken = Duration.between(startTime, endTime).toMillis();
+            logger.info("Time taken to upload photo: " + timeTaken + " ms");
         }
+
         return uploadPath;
     }
 
-    public synchronized static void uploadMetadata(String location, String subject, String season, String[] keywords, String uploadPath) {
+    public static void uploadMetadata(String location, String subject, String season, String[] keywords, String uploadPath) {
+        Instant startTime = Instant.now();
+        logger.info("Starting metadata upload for photo: " + uploadPath);
+
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpPost uploadMetadata = new HttpPost(UPLOAD_METADATA_URL);
 
             Map<String, Object> metadata = new HashMap<>();
-            // todo - move constants
             metadata.put("location", location);
             metadata.put("subject", subject);
             metadata.put("season", season);
@@ -123,6 +166,10 @@ public class uploadClient {
             }
         } catch (IOException e) {
             logger.log(Level.SEVERE, "An error occurred during metadata upload", e);
+        } finally {
+            Instant endTime = Instant.now();
+            long timeTaken = Duration.between(startTime, endTime).toMillis();
+            logger.info("Time taken to upload metadata: " + timeTaken + " ms");
         }
     }
 }

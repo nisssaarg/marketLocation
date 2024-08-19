@@ -20,7 +20,7 @@ public class UploadPhotoHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         if ("POST".equals(exchange.getRequestMethod())) {
             logger.info(RECEIVED_REQUEST_TO_UPLOAD_PHOTO);
-
+            logger.info("Thread id: " + Thread.currentThread().getId());
             // Create upload directory if it doesn't exist
             Files.createDirectories(Paths.get(UPLOAD_DIR));
 
@@ -36,7 +36,7 @@ public class UploadPhotoHandler implements HttpHandler {
             FileUploader upload = new FileUploader();
             // Save the uploaded file
             // todo - get rid of filename param
-            boolean success = upload.uploadFile(filename,filePath,fileBytes);
+            boolean success = upload.uploadFile(filePath,fileBytes);
             if(success){
                 String response = filePath.toString();
                 exchange.sendResponseHeaders(200, response.length());

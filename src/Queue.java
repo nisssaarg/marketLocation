@@ -17,6 +17,7 @@ public class Queue {
     private KafkaConsumer<String, String> consumer;
     //private Gson gson;
     private String topic = "Thumbnail";
+    private int i =0;
 
     public Queue() {
         properties = new Properties();
@@ -65,6 +66,8 @@ public class Queue {
                     System.out.println("No records found.");
                 }
                 for (ConsumerRecord<String, String> record : records) {
+                    i++;
+                    System.out.println("Dequeue count: " + i);
                     System.out.println("Record received: " + record.value());
                     return record.toString();
                 }

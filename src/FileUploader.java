@@ -7,7 +7,7 @@ class FileUploader implements FileUploaderInterface {
     private static final Logger logger = Logger.getLogger(FileUploader.class.getName());
     //private static final String UPLOAD_DIR = "uploads";
     @Override
-    public boolean uploadFile(String fileName , Path filePath, byte[] fileBytes)  {
+    public boolean uploadFile( Path filePath, byte[] fileBytes)  {
         //File uploadedFile = new File(UPLOAD_DIR + File.separator + fileName);
         try (OutputStream os = new FileOutputStream(filePath.toFile())) {
             os.write(fileBytes);
