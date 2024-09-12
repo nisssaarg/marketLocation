@@ -2,6 +2,7 @@ import java.util.Map;
 
 // todo - use final pretty much everywhere in thsi class
 public final class Metadata {
+    private static final String HASH2 = "hash";
     private static final String KEYWORD52 = "keyword5";
     private static final String KEYWORD32 = "keyword3";
     private static final String KEYWORD42 = "keyword4";
@@ -12,7 +13,7 @@ public final class Metadata {
     private static final String LOCATION2 = "location";
     private static final String PHOTO_PATH2 = "photo_path";
     private int metadataId;
-    private String photo_path;      
+    //private String photo_path;      
     private String location;   
     private String season;     
     private String subject;    
@@ -21,11 +22,12 @@ public final class Metadata {
     private String keyword3;   
     private String keyword4;   
     private String keyword5;
+    //private String hash;
 
     // Constructor that accepts a Map
     public Metadata(Map<String, Object> data) {
         //this.metadataId = (int) data.get("metadataId");
-        this.photo_path = (String) data.get(PHOTO_PATH2);
+        //this.photo_path = (String) data.get(PHOTO_PATH2);
         this.location = (String) data.get(LOCATION2);
         this.season = (String) data.get(SEASON2);
         this.subject = (String) data.get(SUBJECT2);
@@ -34,6 +36,7 @@ public final class Metadata {
         this.keyword3 = (String) data.get(KEYWORD32);
         this.keyword4 = (String) data.get(KEYWORD42);
         this.keyword5 = (String) data.get(KEYWORD52);
+        //this.hash = (String) data.get(HASH2);
     }
 
     // Getters and Setters
@@ -45,13 +48,13 @@ public final class Metadata {
         this.metadataId = metadataId;
     }
 
-    public String getPhoto_path() {
-        return photo_path;
-    }
+    // public String getPhoto_path() {
+    //     return photo_path;
+    // }
 
-    public void setPhotoId(String photo_path) {
-        this.photo_path = photo_path;
-    }
+    // public void setPhotoId(String photo_path) {
+    //     this.photo_path = photo_path;
+    // }
 
     public String getLocation() {
         return location;
@@ -116,4 +119,5 @@ public final class Metadata {
     public void setKeyword5(String keyword5) {
         this.keyword5 = keyword5;
     }
+
 }

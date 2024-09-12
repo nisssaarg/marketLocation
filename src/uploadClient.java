@@ -7,8 +7,10 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,6 +26,11 @@ import java.util.logging.*;
 
 public class uploadClient {
 
+    private static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String POST = "POST";
+    private static final String STARTING_PHOTO_UPLOAD_FOR = "Starting photo upload for: ";
+    private static final String FILE_NOT_FOUND = "File not found: ";
     private static final String UPLOAD_PHOTO_URL = "http://localhost:8000/api/uploadPhoto";
     private static final String UPLOAD_METADATA_URL = "http://localhost:8000/api/uploadMetadata";
     private static final Logger logger = Logger.getLogger(uploadClient.class.getName());
@@ -44,7 +51,7 @@ public class uploadClient {
             // Remove existing handlers (to avoid console output)
             Logger rootLogger = Logger.getLogger("");
             Handler[] handlers = rootLogger.getHandlers();
-            for(Handler handler : handlers) {
+            for (Handler handler : handlers) {
                 rootLogger.removeHandler(handler);
             }
 
@@ -59,38 +66,34 @@ public class uploadClient {
         }
     }
 
-    public static String uploadPhoto(String filePath) throws IOException {
+    public static Map<String, String> uploadPhoto(String filePath) throws IOException {
         File file = new File(filePath);
         if (!file.exists() || file.isDirectory()) {
-            logger.severe("File not found: " + filePath);
-            return "";
+            logger.severe(FILE_NOT_FOUND + filePath);
+            return new HashMap<>(); // Return an empty map in case of failure
         }
 
-        String uploadPath = "";
+        Map<String, String> responseMap = new HashMap<>();
         Instant startTime = Instant.now();
-        logger.info("Starting photo upload for: " + filePath);
+        logger.info(STARTING_PHOTO_UPLOAD_FOR + filePath);
 
         HttpURLConnection connection = null;
         DataOutputStream dos = null;
 
-        try (FileInputStream fis = new FileInputStream(file)) {
+        try {
+            byte[] fileBytes = convertFileToByteArray(file); // Convert file to byte array
+
             URL url = new URL(UPLOAD_PHOTO_URL);
             connection = (HttpURLConnection) url.openConnection();
 
             // Configure the connection
             connection.setDoOutput(true);
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type", "application/octet-stream");
+            connection.setRequestMethod(POST);
+            connection.setRequestProperty(CONTENT_TYPE, APPLICATION_OCTET_STREAM);
 
-            // Send the file
+            // Send the file bytes
             dos = new DataOutputStream(connection.getOutputStream());
-            byte[] buffer = new byte[4096];
-            int bytesRead;
-
-            while ((bytesRead = fis.read(buffer)) != -1) {
-                dos.write(buffer, 0, bytesRead);
-            }
-
+            dos.write(fileBytes);
             dos.flush();
             logger.info("File uploaded successfully!");
 
@@ -104,8 +107,11 @@ public class uploadClient {
                     while ((responseLine = in.readLine()) != null) {
                         response.append(responseLine);
                     }
-                    uploadPath = response.toString();
-                    logger.info("Server response: " + uploadPath);
+                    
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    responseMap = objectMapper.readValue(response.toString(), new TypeReference<Map<String, String>>(){});
+                    
+                    logger.info("Server response: " + responseMap);
                 }
             } else {
                 logger.severe("Failed to upload file. Server responded with code: " + responseCode);
@@ -124,12 +130,13 @@ public class uploadClient {
             logger.info("Time taken to upload photo: " + timeTaken + " ms");
         }
 
-        return uploadPath;
+        return responseMap;
     }
 
-    public static void uploadMetadata(String location, String subject, String season, String[] keywords, String uploadPath) {
+
+    public static void uploadMetadata(String location, String subject, String season, String[] keywords) {
         Instant startTime = Instant.now();
-        logger.info("Starting metadata upload for photo: " + uploadPath);
+        //logger.info("Starting metadata upload for photo: " + uploadPath);
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpPost uploadMetadata = new HttpPost(UPLOAD_METADATA_URL);
@@ -138,7 +145,8 @@ public class uploadClient {
             metadata.put("location", location);
             metadata.put("subject", subject);
             metadata.put("season", season);
-            metadata.put("photo_path", uploadPath);
+            //metadata.put("photo_path", uploadPath);
+            //metadata.put("hash", hash); // Include hash in metadata
 
             for (int i = 0; i < keywords.length; i++) {
                 metadata.put("keyword" + (i + 1), keywords[i]);
@@ -171,5 +179,33 @@ public class uploadClient {
             long timeTaken = Duration.between(startTime, endTime).toMillis();
             logger.info("Time taken to upload metadata: " + timeTaken + " ms");
         }
+    }
+
+    private static byte[] convertFileToByteArray(File file) throws IOException {
+        try (FileInputStream fis = new FileInputStream(file);
+             ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = fis.read(buffer)) != -1) {
+                baos.write(buffer, 0, bytesRead);
+            }
+            return baos.toByteArray();
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        // Example usage
+        String filePath = "/Users/nisssaarg/Desktop/9697.jpg";
+        Map<String, String> uploadResponse = uploadPhoto(filePath);
+        String uploadPath = uploadResponse.get("filename");
+        String hash = uploadResponse.get("hash");
+
+        // Metadata to be uploaded
+        String location = "Example Location";
+        String subject = "Example Subject";
+        String season = "Summer";
+        String[] keywords = {"keyword1", "keyword2"};
+
+        uploadMetadata(location, subject, season, keywords);
     }
 }

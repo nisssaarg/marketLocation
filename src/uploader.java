@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -43,7 +44,8 @@ public class uploader {
                     logger.info("Starting upload for: " + imageFile.getName());
                     logger.info("Thread ID: " + Thread.currentThread().getId());
                     try {
-                        String uploadPath = uploadClient.uploadPhoto(imageFile.getAbsolutePath());
+                        Map<String,String> uploadPath = uploadClient.uploadPhoto(imageFile.getAbsolutePath());
+                        System.out.println(uploadPath.toString());
                         if (uploadPath != null && !uploadPath.isEmpty()) {
                             long uploadDuration = System.currentTimeMillis() - startTime;
                             logger.info("Upload completed for: " + imageFile.getName() + " in " + uploadDuration + " ms");
@@ -54,10 +56,10 @@ public class uploader {
                             String subject = SUBJECTS[RANDOM.nextInt(SUBJECTS.length)];
                             String season = SEASONS[RANDOM.nextInt(SEASONS.length)];
                             String[] keywords = KEYWORDS[RANDOM.nextInt(KEYWORDS.length)];
-                            logger.info("Metadata: Location=" + location + ", Subject=" + subject + ", Season=" + season);
+                            //logger.info("Metadata: Location=" + location + ", Subject=" + subject + ", Season=" + season);
 
                             long metadataStartTime = System.currentTimeMillis();
-                            uploadClient.uploadMetadata(location, subject, season, keywords, uploadPath);
+                            uploadClient.uploadMetadata(location, subject, season, keywords);
                             long metadataDuration = System.currentTimeMillis() - metadataStartTime;
                             logger.info("Metadata upload completed for: " + imageFile.getName() + " in " + metadataDuration + " ms");
 

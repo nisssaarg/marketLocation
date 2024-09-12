@@ -3,6 +3,8 @@ import java.nio.file.Path;
 import java.util.logging.Logger;
 
 class FileUploader implements FileUploaderInterface {
+    private static final String IO_EXCEPTION = "IO Exception";
+    private static final String FILE_NOT_FOUND = "File not found";
     private static final String FILE_UPLOADED = "File uploaded";
     private static final Logger logger = Logger.getLogger(FileUploader.class.getName());
     //private static final String UPLOAD_DIR = "uploads";
@@ -15,11 +17,11 @@ class FileUploader implements FileUploaderInterface {
             logger.info(FILE_UPLOADED);
             return true;
         }catch(FileNotFoundException e){
-            logger.warning("File not found");
+            logger.warning(FILE_NOT_FOUND);
         } catch (IOException e) {
-           logger.warning("IO Exception");
+           logger.warning(IO_EXCEPTION);
         }
-        // todo - move this to a finally block
         return false;
+        
     }
 }

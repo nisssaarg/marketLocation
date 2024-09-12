@@ -6,6 +6,15 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
 
 public class DatabasePool {
+    private static final String FAILED_TO_CLOSE_CONNECTION = "Failed to close connection: ";
+    private static final String CLOSED_CONNECTION = "Closed connection: ";
+    private static final String FAILED_TO_RELEASE_CONNECTION = "Failed to release connection: ";
+    private static final String CONNECTION_IS_CLOSED_AND_CANNOT_BE_RETURNED_TO_THE_POOL = "Connection is closed and cannot be returned to the pool.";
+    private static final String CONNECTION_RELEASED = "Connection released";
+    private static final String CONNECTIONS_LEFT = "Connections left: ";
+    private static final String OBTAINED_CONNECTION = "Obtained connection: ";
+    private static final String MAXIMUM_POOL_SIZE_REACHED_NO_AVAILABLE_CONNECTIONS = "Maximum pool size reached, no available connections!";
+    private static final String CREATING_NEW_CONNECTION = "Creating new connection";
     private static final String DB_URL = "jdbc:postgresql://localhost:5432/photomarketplace";
     private static final String USER = "nisssaarg";
     private static final String PASS = "icecubes";
@@ -35,7 +44,7 @@ public class DatabasePool {
     }
 
     private static Connection createConnection() throws SQLException {
-        logger.info("Creating new connection");
+        logger.info(CREATING_NEW_CONNECTION);
         Connection connection = DriverManager.getConnection(DB_URL, USER, PASS);
         connection.setAutoCommit(false); // Disable auto-commit
         return connection;
@@ -47,11 +56,11 @@ public class DatabasePool {
             if (connectionPool.size() < INITIAL_POOL_SIZE) {
                 connection = createConnection();
             } else {
-                throw new SQLException("Maximum pool size reached, no available connections!");
+                throw new SQLException(MAXIMUM_POOL_SIZE_REACHED_NO_AVAILABLE_CONNECTIONS);
             }
         }
-        logger.info("Obtained connection: " + connection);
-        logger.info("Connections left: " + connectionPool.size());
+        logger.info(OBTAINED_CONNECTION + connection);
+        logger.info(CONNECTIONS_LEFT + connectionPool.size());
         return connection;
     }
 
@@ -60,12 +69,12 @@ public class DatabasePool {
             if (!connection.isClosed()) {
                 connection.rollback();
                 connectionPool.offer(connection); 
-                logger.info("Connection released");
+                logger.info(CONNECTION_RELEASED);
             } else {
-                logger.severe("Connection is closed and cannot be returned to the pool.");
+                logger.severe(CONNECTION_IS_CLOSED_AND_CANNOT_BE_RETURNED_TO_THE_POOL);
             }
         } catch (SQLException e) {
-            logger.severe("Failed to release connection: " + e.getMessage());
+            logger.severe(FAILED_TO_RELEASE_CONNECTION + e.getMessage());
         }
     }
 
@@ -73,9 +82,9 @@ public class DatabasePool {
         for (Connection connection : connectionPool) {
             try {
                 connection.close();
-                logger.info("Closed connection: " + connection);
+                logger.info(CLOSED_CONNECTION + connection);
             } catch (SQLException e) {
-                logger.severe("Failed to close connection: " + e.getMessage());
+                logger.severe(FAILED_TO_CLOSE_CONNECTION + e.getMessage());
             }
         }
     }

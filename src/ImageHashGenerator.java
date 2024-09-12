@@ -5,12 +5,15 @@ import java.util.logging.Logger;
 
 public final class ImageHashGenerator {
 
+    private static final String ERROR_GENERATING_HASH_ALGORITHM_NOT_FOUND = "Error generating hash: Algorithm not found";
+    private static final String GENERATED_HASH = "Generated hash: ";
+    private static final String SHA_256 = "SHA-256";
     private static final Logger logger = Logger.getLogger(ImageHashGenerator.class.getName());
 
     public static String generateImageHash(byte[] fileBytes) {
         try {
             // Create a MessageDigest instance for SHA-256
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            MessageDigest digest = MessageDigest.getInstance(SHA_256);
 
             // Update the digest with the byte array
             digest.update(fileBytes);
@@ -27,10 +30,10 @@ public final class ImageHashGenerator {
             }
 
             String hash = hexString.toString(); // Return the generated hash
-            logger.info("Generated hash: " + hash);
+            logger.info(GENERATED_HASH + hash);
             return hash;
         } catch (NoSuchAlgorithmException e) {
-            logger.log(Level.SEVERE, "Error generating hash: Algorithm not found", e);
+            logger.log(Level.SEVERE, ERROR_GENERATING_HASH_ALGORITHM_NOT_FOUND, e);
             return null;
         }
     }

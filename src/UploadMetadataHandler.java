@@ -3,7 +3,6 @@ import com.sun.net.httpserver.HttpExchange;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.*;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -27,9 +26,8 @@ class UploadMetadataHandler implements HttpHandler {
             InputStream is = exchange.getRequestBody();
             String json = new BufferedReader(new InputStreamReader(is))
                     .lines()
-                    .collect(Collectors.joining("\n")); // Improved reading of input stream
+                    .collect(Collectors.joining("\n"));
 
-            Map<String, String> rs = new HashMap<>();
             Map<String, Object> metadata;
             try {
                 metadata = objectMapper.readValue(json, Map.class);
@@ -38,12 +36,11 @@ class UploadMetadataHandler implements HttpHandler {
                 // Use a connection from the pool
 
                 MetadataWriter writer = new MetadataWriter();
-                rs = writer.writeToDatabase(metadata);
-            
+                Map<String, String> rs = writer.writeToDatabase(metadata);
 
                 String response = UPLOADED_METADATA_SUCCESSFULLY;
                 exchange.sendResponseHeaders(200, response.length());
-                try (OutputStream os = exchange.getResponseBody()) { // Ensure OutputStream is closed
+                try (OutputStream os = exchange.getResponseBody()) {
                     os.write(response.getBytes());
                 }
                 logger.info(METADATA_UPLOADED_SUCCESSFULLY);

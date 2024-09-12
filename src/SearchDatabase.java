@@ -13,7 +13,7 @@ public class SearchDatabase {
     public List<String> executeSearchQuery(String sqlQuery, List<Object> parameters) {
         List<String> results = new ArrayList<>();
 
-        try (Connection conn = DatabaseConnection.getConnection();
+        try (Connection conn = DatabasePool.getInstance().getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sqlQuery)) {
             
             for (int i = 0; i < parameters.size(); i++) {

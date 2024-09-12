@@ -12,6 +12,23 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 
 public class Queue {
+    private static final String RECORD_RECEIVED = "Record received: ";
+    private static final String DEQUEUE_COUNT = "Dequeue count: ";
+    private static final String NO_RECORDS_FOUND = "No records found.";
+    private static final String POLLING_FOR_MESSAGES = "Polling for messages...";
+    private static final String OFFSET = "Offset";
+    private static final String PARTITION = "Partition";
+    private static final String MESSAGE_SENT_TO_TOPIC = "Message sent to topic";
+    private static final String VALUE_DESERIALIZER = "value.deserializer";
+    private static final String ORG_APACHE_KAFKA_COMMON_SERIALIZATION_STRING_DESERIALIZER = "org.apache.kafka.common.serialization.StringDeserializer";
+    private static final String KEY_DESERIALIZER = "key.deserializer";
+    private static final String THUMBNAIL_CONSUMER_GROUP = "thumbnail-consumer-group";
+    private static final String GROUP_ID = "group.id";
+    private static final String VALUE_SERIALIZER = "value.serializer";
+    private static final String ORG_APACHE_KAFKA_COMMON_SERIALIZATION_STRING_SERIALIZER = "org.apache.kafka.common.serialization.StringSerializer";
+    private static final String KEY_SERIALIZER = "key.serializer";
+    private static final String LOCALHOST_9092 = "localhost:9092";
+    private static final String BOOTSTRAP_SERVERS = "bootstrap.servers";
     private Properties properties;
     private KafkaProducer<String, String> producer;
     private KafkaConsumer<String, String> consumer;
@@ -21,12 +38,12 @@ public class Queue {
 
     public Queue() {
         properties = new Properties();
-        properties.put("bootstrap.servers", "localhost:9092");
-        properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        properties.put("group.id", "thumbnail-consumer-group");
-        properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        properties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        properties.put(BOOTSTRAP_SERVERS, LOCALHOST_9092);
+        properties.put(KEY_SERIALIZER, ORG_APACHE_KAFKA_COMMON_SERIALIZATION_STRING_SERIALIZER);
+        properties.put(VALUE_SERIALIZER, ORG_APACHE_KAFKA_COMMON_SERIALIZATION_STRING_SERIALIZER);
+        properties.put(GROUP_ID, THUMBNAIL_CONSUMER_GROUP);
+        properties.put(KEY_DESERIALIZER, ORG_APACHE_KAFKA_COMMON_SERIALIZATION_STRING_DESERIALIZER);
+        properties.put(VALUE_DESERIALIZER, ORG_APACHE_KAFKA_COMMON_SERIALIZATION_STRING_DESERIALIZER);
 
         producer = new KafkaProducer<>(properties);
         consumer = new KafkaConsumer<>(properties);
@@ -44,7 +61,7 @@ public class Queue {
                     if (exception != null) {
                         exception.printStackTrace();
                     } else {
-                        System.out.println("Message sent to topic" + metadata.topic() + "Partition" + metadata.partition() + "Offset" + metadata.offset());
+                        System.out.println(MESSAGE_SENT_TO_TOPIC + metadata.topic() + PARTITION + metadata.partition() + OFFSET + metadata.offset());
                     }
                 }
             });
@@ -60,15 +77,15 @@ public class Queue {
     public synchronized String dequeue() {
         try{
             while(true){
-                System.out.println("Polling for messages...");
+                System.out.println(POLLING_FOR_MESSAGES);
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
                 if (records.isEmpty()) {
-                    System.out.println("No records found.");
+                    System.out.println(NO_RECORDS_FOUND);
                 }
                 for (ConsumerRecord<String, String> record : records) {
                     i++;
-                    System.out.println("Dequeue count: " + i);
-                    System.out.println("Record received: " + record.value());
+                    System.out.println(DEQUEUE_COUNT + i);
+                    System.out.println(RECORD_RECEIVED + record.value());
                     return record.toString();
                 }
             }

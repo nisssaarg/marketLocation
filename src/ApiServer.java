@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 public class ApiServer {
 
+    private static final String STARTING_THE_SERVER = "Starting the server...";
     private static final String SERVER_STARTED_ON_PORT_8000 = "Server started on port 8000";
     private static final String API_PHOTOS_SEARCH = "/api/photos/search";
     private static final String API_PHOTOS2 = "/api/photos";
@@ -28,7 +29,7 @@ public class ApiServer {
             uploadDir.mkdir();
         }
 
-        logger.info("Starting the server...");
+        logger.info(STARTING_THE_SERVER);
         HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
         server.createContext(API_UPLOAD_PHOTO, new UploadPhotoHandler());
         server.createContext(API_UPLOAD_METADATA, new UploadMetadataHandler());
@@ -48,11 +49,14 @@ public class ApiServer {
 
 
     static class ListPhotosHandler implements HttpHandler {
+        private static final String LIST_OF_ALL_PHOTOS = "List of all photos";
+        private static final String RECEIVED_REQUEST_TO_LIST_PHOTOS = "Received request to list photos";
+
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             if ("GET".equals(exchange.getRequestMethod())) {
-                logger.info("Received request to list photos");
-                String response = "List of all photos";
+                logger.info(RECEIVED_REQUEST_TO_LIST_PHOTOS);
+                String response = LIST_OF_ALL_PHOTOS;
                 exchange.sendResponseHeaders(200, response.length());
                 OutputStream os = exchange.getResponseBody();
                 os.write(response.getBytes());
