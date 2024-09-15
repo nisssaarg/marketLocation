@@ -30,29 +30,35 @@ public class UploadPhotoHandler implements HttpHandler {
             
             boolean success = false;
             String hash = ImageHashGenerator.generateImageHash(fileBytes);
-            String isExists = DuplicateChecker.checkDuplicates(hash);
+            DuplicateRecord duplicateRecord = DuplicateChecker.checkDuplicates(hash);
             String filename;
             Path filePath;
             FileUploader upload = new FileUploader();
 
-            if (isExists == null) {
+            if (duplicateRecord == null) {
+                // No duplicate found, proceed with new upload
                 filename = System.currentTimeMillis() + "_uploaded_photo.jpg";
                 filePath = Paths.get(UPLOAD_DIR, filename);
                 success = upload.uploadFile(filePath, fileBytes);
                 
                 // Save hash and photo_path in the HASH table
                 MetadataWriter writer = new MetadataWriter();
-                writer.savePhotoPath(hash, filePath.toString());
-
+                String hashId = writer.savePhotoPath(hash, filePath.toString());
                 filename = filePath.toString();
+                duplicateRecord = new DuplicateRecord(hashId, hash, filename);
             } else {
-                filename = isExists;
+                // Duplicate found, no need to re-upload
+                filename = duplicateRecord.getPhotoPath();
                 success = true;
             }
 
             String jsonResponse = "";
             if (success) {
-                jsonResponse = new ObjectMapper().writeValueAsString(Map.of("filename", filename, "hash", hash));
+                jsonResponse = new ObjectMapper().writeValueAsString(Map.of(
+                        "hash_id", duplicateRecord.getHashId(),
+                        "hash", duplicateRecord.getHash(),
+                        "filename", filename
+                ));
                 logger.info(jsonResponse);
                 exchange.sendResponseHeaders(200, jsonResponse.length());
             } else {
@@ -69,4 +75,3 @@ public class UploadPhotoHandler implements HttpHandler {
         }
     }
 }
-

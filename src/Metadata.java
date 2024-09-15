@@ -2,6 +2,7 @@ import java.util.Map;
 
 // todo - use final pretty much everywhere in thsi class
 public final class Metadata {
+    private static final String HASH_ID2 = "hash_id";
     private static final String HASH2 = "hash";
     private static final String KEYWORD52 = "keyword5";
     private static final String KEYWORD32 = "keyword3";
@@ -22,7 +23,7 @@ public final class Metadata {
     private String keyword3;   
     private String keyword4;   
     private String keyword5;
-    //private String hash;
+    private int hash_id;
 
     // Constructor that accepts a Map
     public Metadata(Map<String, Object> data) {
@@ -36,7 +37,7 @@ public final class Metadata {
         this.keyword3 = (String) data.get(KEYWORD32);
         this.keyword4 = (String) data.get(KEYWORD42);
         this.keyword5 = (String) data.get(KEYWORD52);
-        //this.hash = (String) data.get(HASH2);
+        this.hash_id = (int) data.get(HASH_ID2);
     }
 
     // Getters and Setters
@@ -118,6 +119,14 @@ public final class Metadata {
 
     public void setKeyword5(String keyword5) {
         this.keyword5 = keyword5;
+    }
+
+    public void setHash(int hash){
+        this.hash_id = hash;
+    }
+    
+    public int getHash() {
+        return this.hash_id;
     }
 
 }

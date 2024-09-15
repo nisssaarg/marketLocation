@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 public class ApiServer {
 
+    private static final String API_DELETE = "/api/delete";
     private static final String STARTING_THE_SERVER = "Starting the server...";
     private static final String SERVER_STARTED_ON_PORT_8000 = "Server started on port 8000";
     private static final String API_PHOTOS_SEARCH = "/api/photos/search";
@@ -36,6 +37,7 @@ public class ApiServer {
         server.createContext(API_PHOTOS, new PhotoActionHandler());
         server.createContext(API_PHOTOS2, new ListPhotosHandler());
         server.createContext(API_PHOTOS_SEARCH, new SearchPhotosHandler());
+        server.createContext(API_DELETE, new DeleteHandler());
         server.setExecutor(Executors.newFixedThreadPool(10));
         server.start();
         logger.info(SERVER_STARTED_ON_PORT_8000);
