@@ -26,6 +26,7 @@ public class MetadataWriter {
     }
 
     private Map<String, String> writeToDatabaseHelper(Metadata metadata) {
+        logger.info(metadata.toString());
         String sql = INSERT_INTO_METADATA;
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -57,9 +58,9 @@ public class MetadataWriter {
             pstmt.setString(6, metadata.getKeyword3());
             pstmt.setString(7, metadata.getKeyword4());
             pstmt.setString(8, metadata.getKeyword5());
-            pstmt.setInt(9, metadata.getHash());  // Assuming getHash() returns an integer
+            pstmt.setInt(9, metadata.getHash());  
 
-            rs = pstmt.executeQuery(); // Corrected to executeQuery
+            rs = pstmt.executeQuery(); 
             if (rs.next()) {
                 result.put(METADATA_ID, rs.getString(METADATA_ID));
             }

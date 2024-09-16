@@ -61,7 +61,10 @@ public class uploader {
                 long uploadDuration = System.currentTimeMillis() - startTime;
                 logger.info("Upload completed for: " + imageFile.getName() + " in " + uploadDuration + " ms");
 
-                String hash = uploadResponse.get("hash_id");
+                String hash_id = uploadResponse.get("hash_id");
+                String hash = uploadResponse.get("hash");
+                String photo_path = uploadResponse.get("filename");
+
                 // Randomize metadata
                 String location = LOCATIONS[RANDOM.nextInt(LOCATIONS.length)];
                 String subject = SUBJECTS[RANDOM.nextInt(SUBJECTS.length)];
@@ -69,7 +72,7 @@ public class uploader {
                 String[] keywords = KEYWORDS[RANDOM.nextInt(KEYWORDS.length)];
 
                 long metadataStartTime = System.currentTimeMillis();
-                uploadClient.uploadMetadata(location, subject, season, keywords, hash);
+                uploadClient.uploadMetadata(location, subject, season, keywords, hash_id, hash, photo_path);
                 long metadataDuration = System.currentTimeMillis() - metadataStartTime;
                 logger.info("Metadata upload completed for: " + imageFile.getName() + " in " + metadataDuration + " ms");
 

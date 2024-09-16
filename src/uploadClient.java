@@ -134,20 +134,19 @@ public class uploadClient {
     }
 
 
-    public static void uploadMetadata(String location, String subject, String season, String[] keywords,String hash) {
+    public static void uploadMetadata(String location, String subject, String season, String[] keywords,String hash_id, String hash, String photo_path) {
         Instant startTime = Instant.now();
         //logger.info("Starting metadata upload for photo: " + uploadPath);
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpPost uploadMetadata = new HttpPost(UPLOAD_METADATA_URL);
-            Integer a =Integer.valueOf(hash);
             Map<String, Object> metadata = new HashMap<>();
             metadata.put("location", location);
             metadata.put("subject", subject);
             metadata.put("season", season);
-            metadata.put("hash_id" , a);
-            //metadata.put("photo_path", uploadPath);
-            //metadata.put("hash", hash); // Include hash in metadata
+            metadata.put("hash_id" , Integer.valueOf(hash_id));
+            metadata.put("photo_path", photo_path);
+            metadata.put("hash", hash);
 
             for (int i = 0; i < keywords.length; i++) {
                 metadata.put("keyword" + (i + 1), keywords[i]);
