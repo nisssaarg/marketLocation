@@ -6,14 +6,14 @@ import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class LikePhotosClient {
+public class ListPhotosClient {
 
-    private static final Logger logger = Logger.getLogger(LikePhotosClient.class.getName());
+    private static final Logger logger = Logger.getLogger(ListPhotosClient.class.getName());
     private static final String LIST_PHOTOS_URL = "http://localhost:8000/api/photos"; // Update with the actual server URL
 
     public static void main(String[] args) {
         try {
-            LikePhotosClient client = new LikePhotosClient();
+            ListPhotosClient client = new ListPhotosClient();
             client.listPhotos();
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Failed to list photos", e);
@@ -31,12 +31,14 @@ public class LikePhotosClient {
                 String inputLine;
                 while ((inputLine = in.readLine()) != null) {
                     // Each line contains metadata_id and photo_path
-                    String[] parts = inputLine.split(",", 2); // Split only at the first comma
-                    if (parts.length == 2) {
+                    String[] parts = inputLine.split(",", 3); // Split only at the first comma
+                    if (parts.length == 3) {
                         String metadataId = parts[0];
                         String photoPath = parts[1];
+                        String likeCount = parts[2];
                         System.out.println("Metadata ID: " + metadataId);
                         System.out.println("Photo Path: " + photoPath);
+                        System.out.println("Like count: " + likeCount);
                     }
                 }
                 logger.info("Photos retrieved successfully.");

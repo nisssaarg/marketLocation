@@ -17,6 +17,7 @@ public class UploadPhotoHandler implements HttpHandler {
     private static final String RECEIVED_REQUEST_TO_UPLOAD_PHOTO = "Received request to upload photo";
     private static final Logger logger = Logger.getLogger(UploadPhotoHandler.class.getName());
     private static final String UPLOAD_DIR = "uploads";
+    private static int i = 0;
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -30,14 +31,17 @@ public class UploadPhotoHandler implements HttpHandler {
             
             boolean success = false;
             String hash = ImageHashGenerator.generateImageHash(fileBytes);
-            DuplicateRecord duplicateRecord = DuplicateChecker.checkDuplicates(hash);
+            //DuplicateRecord duplicateRecord = DuplicateChecker.checkDuplicates(hash);
+            uniquePhoto unique = uniquePhoto.getInstance();
+            DuplicateRecord duplicateRecord = unique.findPhoto(hash);
             String filename;
             Path filePath;
             FileUploader upload = new FileUploader();
-
+            
             if (duplicateRecord == null) {
                 // No duplicate found, proceed with new upload
-                filename = System.currentTimeMillis() + "_uploaded_photo.jpg";
+                
+                filename = System.currentTimeMillis()+String.valueOf(i++) + "_uploaded_photo.jpg";
                 filePath = Paths.get(UPLOAD_DIR, filename);
                 success = upload.uploadFile(filePath, fileBytes);
                 
@@ -46,8 +50,9 @@ public class UploadPhotoHandler implements HttpHandler {
                 String hashId = writer.savePhotoPath(hash, filePath.toString());
                 filename = filePath.toString();
                 duplicateRecord = new DuplicateRecord(hashId, hash, filename);
+                unique.addToMap(duplicateRecord);
             } else {
-                // Duplicate found, no need to re-upload
+                
                 filename = duplicateRecord.getPhotoPath();
                 success = true;
             }

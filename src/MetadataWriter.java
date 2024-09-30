@@ -1,5 +1,4 @@
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -8,7 +7,6 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 public class MetadataWriter {
-    private static final String RESULT2 = "Result";
     private static final String METADATA_ID = "metadata_id";
     private static final String HASH_ID = "hash_id";
     private static final String INSERT_INTO_METADATA = "INSERT INTO metadata (location, season, subject, keyword1, keyword2, keyword3, keyword4, keyword5, hash_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING metadata_id";

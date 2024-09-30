@@ -192,20 +192,4 @@ public class uploadClient {
             return baos.toByteArray();
         }
     }
-
-    public static void main(String[] args) throws IOException {
-        // Example usage
-        String filePath = "/Users/nisssaarg/Desktop/9697.jpg";
-        Map<String, String> uploadResponse = uploadPhoto(filePath);
-        String uploadPath = uploadResponse.get("filename");
-        String hash = uploadResponse.get("hash");
-
-        // Metadata to be uploaded
-        String location = "Example Location";
-        String subject = "Example Subject";
-        String season = "Summer";
-        String[] keywords = {"keyword1", "keyword2"};
-
-        //uploadMetadata(location, subject, season, keywords);
-    }
 }

@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 
 public class uploader {
 
-    private static final String IMAGE_FOLDER_PATH = "/Users/nisssaarg/Desktop/car";
+    private static final String IMAGE_FOLDER_PATH = "/Users/nisssaarg/Desktop/demo";
     private static final int THREAD_COUNT = 5; // Number of threads to use
     private static final Logger logger = Logger.getLogger(uploader.class.getName());
 

@@ -107,13 +107,7 @@ public class DeleteDatabaseHelper {
     }
 
     private static void closeResources(ResultSet rs, PreparedStatement pstmt, Connection conn) {
-        // if (deleteRs != null) {
-        //     try {
-        //         deleteRs.close();
-        //     } catch (SQLException e) {
-        //         logger.severe("Failed to close ResultSet: " + e.getMessage());
-        //     }
-        // }
+        
         if (rs != null) {
             try {
                 rs.close();
@@ -121,13 +115,7 @@ public class DeleteDatabaseHelper {
                 logger.severe(FAILED_TO_CLOSE_RESULT_SET + e.getMessage());
             }
         }
-        // if (countRs != null) {
-        //     try {
-        //         countRs.close();
-        //     } catch (SQLException e) {
-        //         logger.severe("Failed to close ResultSet: " + e.getMessage());
-        //     }
-        // }
+        
         if (pstmt != null) {
             try {
                 pstmt.close();
@@ -135,20 +123,6 @@ public class DeleteDatabaseHelper {
                 logger.severe(FAILED_TO_CLOSE_PREPARED_STATEMENT + e.getMessage());
             }
         }
-        // if (countStmt != null) {
-        //     try {
-        //         countStmt.close();
-        //     } catch (SQLException e) {
-        //         logger.severe("Failed to close PreparedStatement: " + e.getMessage());
-        //     }
-        // }
-        // if (deleteStmt != null) {
-        //     try {
-        //         deleteStmt.close();
-        //     } catch (SQLException e) {
-        //         logger.severe("Failed to close PreparedStatement: " + e.getMessage());
-        //     }
-        // }
         if (conn != null) {
             try {
                 conn.rollback();

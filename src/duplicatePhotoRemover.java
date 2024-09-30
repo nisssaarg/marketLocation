@@ -120,7 +120,7 @@ public class duplicatePhotoRemover {
 
             while (rs.next()) {
                 set.add(rs.getString("hash"));
-                File file = new File(rs.getString("photo_path"));
+                //File file = new File(rs.getString("photo_path"));
                 //byte[] fileBytes = convertFileToByteArray(file);
                 String hash = rs.getString("new_hash");
                 generatedHash.add(hash);
